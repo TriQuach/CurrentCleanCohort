@@ -104,7 +104,37 @@ def writeToFileUModel(array,nameFile):
             f.write(item.Attr)
             f.write("\n")
 
+def getArrayBasedOnDictLastUpdate(dictLastUpdate, arrayAttributes, typeModel):
+    arr = []
+    for attr in arrayAttributes:
+        if (attr != "ID" and attr != "Timestamp"):
+            value = dictLastUpdate[attr]["value"]
+            timestamp = dictLastUpdate[attr]["timestamp"]
+            id = dictLastUpdate[attr]["id"]
+            attribute = "player_" + id + "_" + attr
+            if (typeModel == "RModel"):
+                entity = RModel(timestamp, attribute, value)
+            else:
+                entity = UModel(timestamp, attribute)
 
+            arr.append(entity)
+    return arr
+
+def getArrayLastUpdateAllEntity(valid_iD, dicts, arrayAttributes,typeModel):
+    res = []
+    for entity in valid_iD:
+        tempArray = dicts[entity]
+        dictLastUpdate = {}
+        for i in range(len(tempArray) - 1, -1, -1):
+            if (i > 0):
+                dictLastUpdate = lastUpdateRModel(dicts[entity][i], dicts[entity][i - 1],
+                                                  arrayAttributes,
+                                                  dictLastUpdate)
+        dictLastUpdate = fillUnUpdateValue(dictLastUpdate, arrayAttributes, tempArray)
+        arr = getArrayBasedOnDictLastUpdate(dictLastUpdate, arrayAttributes,typeModel)
+        res += arr
+
+    return res
 
 
 arrayAttributes, valid_iD, dicts = creatDict("MLS_Data.csv")
@@ -114,15 +144,10 @@ resUpdatedUModel = getUpdatedUModel(valid_iD,dicts,arrayAttributes)
 writeToFileRModel(resUpdatedRModel,"updated_RModel.txt")
 writeToFileUModel(resUpdatedUModel,"updated_UModel.txt")
 
-tempArray = dicts["Marco-Etcheverry"]
-dictLastUpdate = {}
-for i in range(len(tempArray)-1,-1,-1):
-    if (i>0):
-        dictLastUpdate = lastUpdateRModel(dicts["Marco-Etcheverry"][i], dicts["Marco-Etcheverry"][i-1], arrayAttributes,
-                                      dictLastUpdate)
-dictLastUpdate = fillUnUpdateValue(dictLastUpdate,arrayAttributes,tempArray)
-print(dictLastUpdate)
+resLastUpdateRModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"RModel")
+resLastUpdateUModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"UModel")
 
-
+writeToFileRModel(resLastUpdateRModel,"lastUpdate_RModel.txt")
+writeToFileUModel(resLastUpdateUModel,"lastUpdate_UModel.txt")
 
 print(resUpdatedRModel)
