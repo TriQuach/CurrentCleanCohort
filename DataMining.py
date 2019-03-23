@@ -10,48 +10,48 @@ class UModel:
         self.Time = Time
         self.Attr = Attr
 
-def extractUpdate2SnapShotsRModel(beforeObj,afterObj,arrayAttributes):
+def extractUpdate2SnapShotsRModel(beforeObj,afterObj,arrayAttributes,typeDataset):
     array = []
     for attr in arrayAttributes:
         attr1 = getattr(beforeObj,attr)
         attr2 = getattr(afterObj,attr)
         if (attr1 != attr2 and attr != "Timestamp"):
             idArttr2 = getattr(afterObj,"ID")
-            attrRModel = "player" + "_" + idArttr2 + "_" + attr
+            attrRModel = typeDataset + "_" + idArttr2 + "_" + attr
             timeRModel = getattr(afterObj,"Timestamp")
             entity = RModel(timeRModel,attrRModel,attr2)
             array.append(entity)
 
     return array
 
-def extractUpdate2SnapShotsUModel(beforeObj,afterObj,arrayAttributes):
+def extractUpdate2SnapShotsUModel(beforeObj,afterObj,arrayAttributes,typeDataset):
     array = []
     for attr in arrayAttributes:
         attr1 = getattr(beforeObj,attr)
         attr2 = getattr(afterObj,attr)
         if (attr1 != attr2 and attr != "Timestamp"):
             idArttr2 = getattr(afterObj,"ID")
-            attrRModel = "player" + "_" + idArttr2 + "_" + attr
+            attrRModel = typeDataset + "_" + idArttr2 + "_" + attr
             timeRModel = getattr(afterObj,"Timestamp")
             entity = UModel(timeRModel,attrRModel)
             array.append(entity)
 
     return array
 
-def getUpdatedRModel(valid_iD, dicts,arrayAttributes):
+def getUpdatedRModel(valid_iD, dicts,arrayAttributes,typeDataset):
     array = []
     for id in valid_iD:
         arrayObj = dicts[id]
         for i in range(len(arrayObj) - 1):
-            res = extractUpdate2SnapShotsRModel(arrayObj[i],arrayObj[i+1],arrayAttributes)
+            res = extractUpdate2SnapShotsRModel(arrayObj[i],arrayObj[i+1],arrayAttributes,typeDataset)
             array += res
     return array
-def getUpdatedUModel(valid_iD, dicts,arrayAttributes):
+def getUpdatedUModel(valid_iD, dicts,arrayAttributes,typeDataset):
     array = []
     for id in valid_iD:
         arrayObj = dicts[id]
         for i in range(len(arrayObj) - 1):
-            res = extractUpdate2SnapShotsUModel(arrayObj[i],arrayObj[i+1],arrayAttributes)
+            res = extractUpdate2SnapShotsUModel(arrayObj[i],arrayObj[i+1],arrayAttributes,typeDataset)
             array += res
     return array
 
@@ -104,14 +104,14 @@ def writeToFileUModel(array,nameFile):
             f.write(item.Attr)
             f.write("\n")
 
-def getArrayBasedOnDictLastUpdate(dictLastUpdate, arrayAttributes, typeModel):
+def getArrayBasedOnDictLastUpdate(dictLastUpdate, arrayAttributes, typeModel,typeDataset):
     arr = []
     for attr in arrayAttributes:
         if (attr != "ID" and attr != "Timestamp"):
             value = dictLastUpdate[attr]["value"]
             timestamp = dictLastUpdate[attr]["timestamp"]
             id = dictLastUpdate[attr]["id"]
-            attribute = "player_" + id + "_" + attr
+            attribute = typeDataset + "_" + id + "_" + attr
             if (typeModel == "RModel"):
                 entity = RModel(timestamp, attribute, value)
             else:
@@ -120,7 +120,7 @@ def getArrayBasedOnDictLastUpdate(dictLastUpdate, arrayAttributes, typeModel):
             arr.append(entity)
     return arr
 
-def getArrayLastUpdateAllEntity(valid_iD, dicts, arrayAttributes,typeModel):
+def getArrayLastUpdateAllEntity(valid_iD, dicts, arrayAttributes,typeModel, typeDataset):
     res = []
     for entity in valid_iD:
         tempArray = dicts[entity]
@@ -131,23 +131,36 @@ def getArrayLastUpdateAllEntity(valid_iD, dicts, arrayAttributes,typeModel):
                                                   arrayAttributes,
                                                   dictLastUpdate)
         dictLastUpdate = fillUnUpdateValue(dictLastUpdate, arrayAttributes, tempArray)
-        arr = getArrayBasedOnDictLastUpdate(dictLastUpdate, arrayAttributes,typeModel)
+        arr = getArrayBasedOnDictLastUpdate(dictLastUpdate, arrayAttributes,typeModel,typeDataset)
         res += arr
 
     return res
 
-
+#
 arrayAttributes, valid_iD, dicts = creatDict("MLS_Data.csv")
-resUpdatedRModel = getUpdatedRModel(valid_iD,dicts,arrayAttributes)
-resUpdatedUModel = getUpdatedUModel(valid_iD,dicts,arrayAttributes)
+resUpdatedRModel = getUpdatedRModel(valid_iD,dicts,arrayAttributes,"player")
+resUpdatedUModel = getUpdatedUModel(valid_iD,dicts,arrayAttributes,"player")
 
-writeToFileRModel(resUpdatedRModel,"updated_RModel.txt")
-writeToFileUModel(resUpdatedUModel,"updated_UModel.txt")
+writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel.txt")
+writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel.txt")
 
-resLastUpdateRModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"RModel")
-resLastUpdateUModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"UModel")
+resLastUpdateRModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"RModel","player")
+resLastUpdateUModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"UModel","player")
 
-writeToFileRModel(resLastUpdateRModel,"lastUpdate_RModel.txt")
-writeToFileUModel(resLastUpdateUModel,"lastUpdate_UModel.txt")
+writeToFileRModel(resLastUpdateRModel,"./DataMiningResult/lastUpdate_RModel.txt")
+writeToFileUModel(resLastUpdateUModel,"./DataMiningResult/lastUpdate_UModel.txt")
 
-print(resUpdatedRModel)
+
+#For Shervin's Sensor Dataset
+arrayAttributesSensor, valid_iD_Sensor, dicts_Sensor = creatDict("./sensor datasets/clean_intelsensordata.csv")
+resUpdatedRModel = getUpdatedRModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
+resUpdatedUModel = getUpdatedUModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
+writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel_sensor.txt")
+writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel_sensor.txt")
+
+resLastUpdateRModelSensor = getArrayLastUpdateAllEntity(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"RModel","sensor")
+resLastUpdateUModelSenor = getArrayLastUpdateAllEntity(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"UModel", "sensor")
+
+writeToFileRModel(resLastUpdateRModelSensor,"./DataMiningResult/lastUpdate_RModel_Sensor.txt")
+writeToFileUModel(resLastUpdateUModelSenor,"./DataMiningResult/lastUpdate_UModel_Sensor.txt")
+print(arrayAttributesSensor)

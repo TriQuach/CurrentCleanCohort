@@ -1,5 +1,5 @@
 from ReadFile import *
-
+import numpy as np
 
 class Entity(object):
     pass
@@ -7,7 +7,8 @@ class Entity(object):
 def getValidID(array):
     res = []
     for i in array:
-        i = i.replace(" ", "-")
+        if (" " in i):
+            i = i.replace(" ", "-")
         if (i not in res):
             res.append(i)
     return res
@@ -19,7 +20,7 @@ def hashTable(arrayAttributes,valid_id,dicts):
         dicts[i] = [obj]
     return dicts
 def removeDefaultValue(dicts,valid_id):
-    del dicts['1']
+    del dicts['999']
 
 
     for i in valid_id:
@@ -31,7 +32,7 @@ def initDict(arrayAttributes):
     for i in range(len(arrayAttributes)):
         setattr(temp, arrayAttributes[i], 0)
     dicts = {
-        '1': [temp]
+        '999': [temp]
     }
 
     return dicts
@@ -50,11 +51,15 @@ def inputDataToDicts(dicts,arrayAttributes,df):
         dicts[ID].append(obj)
 
     return dicts
+
 def creatDict(fileName):
     df = readFile(fileName)
+    if isinstance(df["ID"][0], np.int64):
+        df["ID"] = np.char.mod('%d', df["ID"].tolist())
     arrayAttributes = list(df)
     init_dict = initDict(arrayAttributes)
     valid_iD = getValidID(df["ID"])
+
     dictsDefaultValue = hashTable(arrayAttributes,valid_iD,init_dict)
     dictAfterRemoveDefaul = removeDefaultValue(dictsDefaultValue,valid_iD)
     dicts = inputDataToDicts(dictAfterRemoveDefaul,arrayAttributes,df)
