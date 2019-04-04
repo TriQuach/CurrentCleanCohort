@@ -1,5 +1,5 @@
 from Entity import *
-
+import csv
 class RModel:
     def __init__(self, Time, Attr , Value):
         self.Time = Time
@@ -9,6 +9,16 @@ class UModel:
     def __init__(self, Time, Attr):
         self.Time = Time
         self.Attr = Attr
+class Cell:
+    def __init__(self, Role, ID, Property):
+        self.Role = Role
+        self.ID = ID
+        self.Property = Property
+class Probabilistic:
+    def __init__(self, Role, Property):
+        self.Role = Role
+        self.Property = Property
+
 
 def extractUpdate2SnapShotsRModel(beforeObj,afterObj,arrayAttributes,typeDataset):
     array = []
@@ -97,12 +107,38 @@ def writeToFileRModel(array,nameFile):
             f.write(str(item.Value))
             f.write("\n")
 def writeToFileUModel(array,nameFile):
-    with open(nameFile, 'w') as f:
+    # with open(nameFile, 'w') as f:
+    #     for item in array:
+    #         f.write(str(item.Time))
+    #         f.write(",")
+    #         f.write(item.Attr)
+    #         f.write("\n")
+    with open(nameFile, 'wt') as out_file:
+        tsv_writer = csv.writer(out_file, delimiter='\t')
         for item in array:
-            f.write(str(item.Time))
-            f.write(",")
-            f.write(item.Attr)
-            f.write("\n")
+            tsv_writer.writerow([item.Attr, str(item.Time)])
+
+def writeToFileCell(array,nameFile):
+    with open(nameFile, 'wt') as out_file:
+        tsv_writer = csv.writer(out_file, delimiter='\t')
+        for item in array:
+            rolePropAndID = item.Role + "_" + item.ID + "_" + item.Property
+            roleAndID = item.Role + "_" + item.ID
+            roleAndProp = item.Role + "_" + item.Property
+            tsv_writer.writerow([rolePropAndID, roleAndID, roleAndProp])
+
+def writeToFileProbabilistic(array,nameFile):
+    with open(nameFile, 'wt') as out_file:
+        tsv_writer = csv.writer(out_file, delimiter='\t')
+        for item in array:
+            roleAndProp = item.Role + "_" + item.Property
+            tsv_writer.writerow([roleAndProp])
+
+def writeToFileNormalObj(array,nameFile):
+    with open(nameFile, 'wt') as out_file:
+        tsv_writer = csv.writer(out_file, delimiter='\t')
+        for item in array:
+            tsv_writer.writerow([item])
 
 def getArrayBasedOnDictLastUpdate(dictLastUpdate, arrayAttributes, typeModel,typeDataset):
     arr = []
@@ -136,31 +172,87 @@ def getArrayLastUpdateAllEntity(valid_iD, dicts, arrayAttributes,typeModel, type
 
     return res
 
-#
-arrayAttributes, valid_iD, dicts = creatDict("MLS_Data.csv")
-resUpdatedRModel = getUpdatedRModel(valid_iD,dicts,arrayAttributes,"player")
+def getCells(valid_ID, arrayAttributes):
+    arr = []
+
+    for ID in valid_iD:
+        for attr in arrayAttributes:
+            if (attr != "ID" and attr != "Timestamp"):
+                cell = Cell("player", ID, attr)
+                arr.append(cell)
+
+    return arr
+
+def getProbabilistic(role,arrayAttributes):
+    arr = []
+    for attr in arrayAttributes:
+        if (attr != "ID" and attr != "Timestamp"):
+            obj = Probabilistic("player",attr)
+            arr.append(obj)
+
+    return arr
+
+
+
+
+
+#create UMOdel based on Cohorts
+
+arrayAttributes, valid_iD,df,valid_Time, dicts = creatDict("MLS_Data_Small.csv")
 resUpdatedUModel = getUpdatedUModel(valid_iD,dicts,arrayAttributes,"player")
-
-writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel.txt")
-writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel.txt")
-
-resLastUpdateRModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"RModel","player")
 resLastUpdateUModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"UModel","player")
+writeToFileUModel(resUpdatedUModel,"./DataMiningResultCohorts/fiveEntities/updated.tsv")
+writeToFileUModel(resLastUpdateUModel,"./DataMiningResultCohorts/fiveEntities/lastupd.tsv")
+arr = getCells(df,arrayAttributes)
+writeToFileCell(arr, "./DataMiningResultCohorts/fiveEntities/cell.tsv")
+arrProbabilistic = getProbabilistic("player",arrayAttributes)
+writeToFileProbabilistic(arrProbabilistic,"./DataMiningResultCohorts/fiveEntities/probabilistic.tsv")
+writeToFileNormalObj(valid_Time,"./DataMiningResultCohorts/fiveEntities/time.tsv")
+print("a")
 
-writeToFileRModel(resLastUpdateRModel,"./DataMiningResult/lastUpdate_RModel.txt")
-writeToFileUModel(resLastUpdateUModel,"./DataMiningResult/lastUpdate_UModel.txt")
+
+# arrayAttributes, valid_iD,df,valid_Time, dicts = creatDict("MLS_Data_Small.csv")
+# resUpdatedRModel = getUpdatedRModel(valid_iD,dicts,arrayAttributes,"player")
+# resUpdatedUModel = getUpdatedUModel(valid_iD,dicts,arrayAttributes,"player")
+#
+# writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel.txt")
+# writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel.tsv")
+#
+# resLastUpdateRModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"RModel","player")
+# resLastUpdateUModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"UModel","player")
+#
+# writeToFileRModel(resLastUpdateRModel,"./DataMiningResult/lastUpdate_RModel.txt")
+# writeToFileUModel(resLastUpdateUModel,"./DataMiningResult/lastUpdate_UModel.tsv")
+#
+# arr = getCells(df,arrayAttributes)
+# writeToFileCell(arr,"./DataMiningResult/cell_MLS.tsv")
+#
+# arrProbabilistic = getProbabilistic("player",arrayAttributes)
+# writeToFileProbabilistic(arrProbabilistic,"./DataMiningResult/probabilistic_MLS.tsv")
+#
+# writeToFileNormalObj(valid_Time,"./DataMiningResult/time_MLS.tsv")
+# print(arr)
 
 
-#For Shervin's Sensor Dataset
-arrayAttributesSensor, valid_iD_Sensor, dicts_Sensor = creatDict("./sensor datasets/clean_intelsensordata.csv")
-resUpdatedRModel = getUpdatedRModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
-resUpdatedUModel = getUpdatedUModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
-writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel_sensor.txt")
-writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel_sensor.txt")
 
-resLastUpdateRModelSensor = getArrayLastUpdateAllEntity(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"RModel","sensor")
-resLastUpdateUModelSenor = getArrayLastUpdateAllEntity(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"UModel", "sensor")
+# For Shervin's Sensor Dataset
+# arrayAttributesSensor, valid_iD_Sensor, dicts_Sensor = creatDict("./sensor datasets/clean_intelsensordata.csv")
+# resUpdatedRModel = getUpdatedRModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
+# resUpdatedUModel = getUpdatedUModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
+# writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel_sensor.txt")
+# writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel_sensor.txt")
+#
+# resLastUpdateRModelSensor = getArrayLastUpdateAllEntity(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"RModel","sensor")
+# resLastUpdateUModelSenor = getArrayLastUpdateAllEntity(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"UModel", "sensor")
+#
+# writeToFileRModel(resLastUpdateRModelSensor,"./DataMiningResult/lastUpdate_RModel_Sensor.txt")
+# writeToFileUModel(resLastUpdateUModelSenor,"./DataMiningResult/lastUpdate_UModel_Sensor.txt")
 
-writeToFileRModel(resLastUpdateRModelSensor,"./DataMiningResult/lastUpdate_RModel_Sensor.txt")
-writeToFileUModel(resLastUpdateUModelSenor,"./DataMiningResult/lastUpdate_UModel_Sensor.txt")
-print(arrayAttributesSensor)
+#
+# #For Zheng's Sensor Dataset
+# arrayAttributesSensor, valid_iD_Sensor, dicts_Sensor = creatDict("Sensor.csv")
+# resUpdatedRModel = getUpdatedRModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
+# resUpdatedUModel = getUpdatedUModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
+# writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel_sensorZheng.txt")
+# writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel_sensorZheng.txt")
+# print(arrayAttributesSensor)
