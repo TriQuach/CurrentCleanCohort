@@ -13,9 +13,12 @@ def getValidID(array):
         if (" " in i):
             i = i.replace(" ", "-")
         if (i not in res ):
-            if (i in fiveEntities):
-                res.append(i)
+            # if (i in cutEntities):
+            res.append(i)
     return res
+
+def cutEntities(valid_iD,length):
+    return (valid_iD[:length])
 def getValidTime(array):
     res = []
     for i in array:
@@ -48,7 +51,7 @@ def initDict(arrayAttributes):
     return dicts
 
 
-def inputDataToDicts(dicts,arrayAttributes,df):
+def inputDataToDicts(dicts,arrayAttributes,df,cutEntities):
     for index, row in df.iterrows():
         obj = Entity()
         # setattr(obj,a)
@@ -58,8 +61,8 @@ def inputDataToDicts(dicts,arrayAttributes,df):
                 attribute_value = attribute_value.replace(" ", "-")
             setattr(obj,attr,attribute_value)
         ID = getattr(obj,"ID")
-        if (ID in fiveEntities):
-           dicts[ID].append(obj)
+        if (ID in cutEntities):
+            dicts[ID].append(obj)
 
     return dicts
 
@@ -84,6 +87,8 @@ def cleanSpecialCharacter(df, arrayAttributes,character):
     return df
 def creatDict(fileName):
     df = readFile(fileName)
+    valid_iD = getValidID(df["ID"])
+    valid_iD = cutEntities(valid_iD,100)
     arrayAttributes = list(df)
     if isinstance(df["ID"][0], np.int64):
         df["ID"] = np.char.mod('%d', df["ID"].tolist())
@@ -91,11 +96,11 @@ def creatDict(fileName):
     #     df = cleanSpecialCharacter(df,arrayAttributes,":")
     #     print("asd")
     init_dict = initDict(arrayAttributes)
-    valid_iD = getValidID(df["ID"])
+
     valid_Time = getValidTime(df["Timestamp"])
     dictsDefaultValue = hashTable(arrayAttributes,valid_iD,init_dict)
     dictAfterRemoveDefaul = removeDefaultValue(dictsDefaultValue,valid_iD)
-    dicts = inputDataToDicts(dictAfterRemoveDefaul,arrayAttributes,df)
+    dicts = inputDataToDicts(dictAfterRemoveDefaul,arrayAttributes,df,valid_iD)
     return arrayAttributes,valid_iD,df,valid_Time, dicts
 
 

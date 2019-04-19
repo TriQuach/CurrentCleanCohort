@@ -198,61 +198,16 @@ def getProbabilistic(role,arrayAttributes):
 
 #create UMOdel based on Cohorts
 
-arrayAttributes, valid_iD,df,valid_Time, dicts = creatDict("MLS_Data_Small.csv")
+arrayAttributes, valid_iD,df,valid_Time, dicts = creatDict("MLS_Data_2007.csv")
 resUpdatedUModel = getUpdatedUModel(valid_iD,dicts,arrayAttributes,"player")
 resLastUpdateUModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"UModel","player")
-writeToFileUModel(resUpdatedUModel,"./DataMiningResultCohorts/fiveEntities/updated.tsv")
-writeToFileUModel(resLastUpdateUModel,"./DataMiningResultCohorts/fiveEntities/lastupd.tsv")
+writeToFileUModel(resUpdatedUModel,"./DataMiningResultCohorts/FullEntitiesMLS/updated.tsv")
+writeToFileUModel(resLastUpdateUModel,"./DataMiningResultCohorts/FullEntitiesMLS/lastupd.tsv")
 arr = getCells(df,arrayAttributes)
-writeToFileCell(arr, "./DataMiningResultCohorts/fiveEntities/cell.tsv")
+writeToFileCell(arr, "./DataMiningResultCohorts/FullEntitiesMLS/cell.tsv")
 arrProbabilistic = getProbabilistic("player",arrayAttributes)
-writeToFileProbabilistic(arrProbabilistic,"./DataMiningResultCohorts/fiveEntities/probabilistic.tsv")
-writeToFileNormalObj(valid_Time,"./DataMiningResultCohorts/fiveEntities/time.tsv")
+writeToFileProbabilistic(arrProbabilistic,"./DataMiningResultCohorts/FullEntitiesMLS/probabilistic.tsv")
+writeToFileNormalObj(valid_Time,"./DataMiningResultCohorts/FullEntitiesMLS/time.tsv")
 print("a")
 
 
-# arrayAttributes, valid_iD,df,valid_Time, dicts = creatDict("MLS_Data_Small.csv")
-# resUpdatedRModel = getUpdatedRModel(valid_iD,dicts,arrayAttributes,"player")
-# resUpdatedUModel = getUpdatedUModel(valid_iD,dicts,arrayAttributes,"player")
-#
-# writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel.txt")
-# writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel.tsv")
-#
-# resLastUpdateRModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"RModel","player")
-# resLastUpdateUModel = getArrayLastUpdateAllEntity(valid_iD,dicts,arrayAttributes,"UModel","player")
-#
-# writeToFileRModel(resLastUpdateRModel,"./DataMiningResult/lastUpdate_RModel.txt")
-# writeToFileUModel(resLastUpdateUModel,"./DataMiningResult/lastUpdate_UModel.tsv")
-#
-# arr = getCells(df,arrayAttributes)
-# writeToFileCell(arr,"./DataMiningResult/cell_MLS.tsv")
-#
-# arrProbabilistic = getProbabilistic("player",arrayAttributes)
-# writeToFileProbabilistic(arrProbabilistic,"./DataMiningResult/probabilistic_MLS.tsv")
-#
-# writeToFileNormalObj(valid_Time,"./DataMiningResult/time_MLS.tsv")
-# print(arr)
-
-
-
-# For Shervin's Sensor Dataset
-# arrayAttributesSensor, valid_iD_Sensor, dicts_Sensor = creatDict("./sensor datasets/clean_intelsensordata.csv")
-# resUpdatedRModel = getUpdatedRModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
-# resUpdatedUModel = getUpdatedUModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
-# writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel_sensor.txt")
-# writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel_sensor.txt")
-#
-# resLastUpdateRModelSensor = getArrayLastUpdateAllEntity(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"RModel","sensor")
-# resLastUpdateUModelSenor = getArrayLastUpdateAllEntity(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"UModel", "sensor")
-#
-# writeToFileRModel(resLastUpdateRModelSensor,"./DataMiningResult/lastUpdate_RModel_Sensor.txt")
-# writeToFileUModel(resLastUpdateUModelSenor,"./DataMiningResult/lastUpdate_UModel_Sensor.txt")
-
-#
-# #For Zheng's Sensor Dataset
-# arrayAttributesSensor, valid_iD_Sensor, dicts_Sensor = creatDict("Sensor.csv")
-# resUpdatedRModel = getUpdatedRModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
-# resUpdatedUModel = getUpdatedUModel(valid_iD_Sensor,dicts_Sensor,arrayAttributesSensor,"sensor")
-# writeToFileRModel(resUpdatedRModel,"./DataMiningResult/updated_RModel_sensorZheng.txt")
-# writeToFileUModel(resUpdatedUModel,"./DataMiningResult/updated_UModel_sensorZheng.txt")
-# print(arrayAttributesSensor)
